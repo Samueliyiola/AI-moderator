@@ -1,0 +1,35 @@
+{
+  "name": "AI-MODERATOR backend",
+  "version": "1.0.0",
+  "main": "index.js",
+ 
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only --require tsconfig-paths/register src/server.ts",
+    "dev1": "node --loader ts-node/esm src/server.ts",
+    "dev2": "nodemon src/server.ts",
+    "start": "ts-node --esm src/server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "amqplib": "^0.10.9",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.1",
+    "nodemon": "^3.1.14",
+    "openai": "^6.32.0"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.8",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
+  }
+}
