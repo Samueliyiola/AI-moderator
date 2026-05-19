@@ -3,7 +3,7 @@ import {createServer} from "http";
 const server = createServer(app);
 import dotenv from "dotenv";
 import type {Request, Response} from "express";
-import {connectDB, disconnectDB} from "./core/config/db"
+// import {connectDB, disconnectDB} from "./core/config/db"
 
 dotenv.config();
 
@@ -17,7 +17,7 @@ app.get("/", (req: Request, res: Response)=>{
 
 server.listen(PORT, () =>{
     try {
-        connectDB();
+        // connectDB();
         console.log(`Server is running on port ${PORT}`);
     } catch (error) {
         console.error("Error dey bro!")
