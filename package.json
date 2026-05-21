@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^6.19.3",
     "@types/cors": "^2.8.19",
