@@ -27,17 +27,12 @@ const moderateText = async (text: string) => {
     """${text}"""
     `;
 
-    const result = await geminiModel.generateContent(
-    prompt
-    );
+    const result = await geminiModel.generateContent(prompt);
 
     const response = await result.response.text();
 
     // Clean Gemini markdown formatting if present
-    const cleanedResponse = response
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
+    const cleanedResponse = response.replace(/```json/g, "").replace(/```/g, "").trim();
 
     return JSON.parse(cleanedResponse);
 };

@@ -1,0 +1,56 @@
+services:
+  api:
+    build: .
+    container_name: ai-moderator-api
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    # I defined these explicitly here so my Node.js code can read them instantly
+    environment:
+      # DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_moderator
+      # RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      DATABASE_URL: ${DATABASE_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    volumes:
+      - .:/app
+    command: npm run dev
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-moderator-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_moderator
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_moderator"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: ai-moderator-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

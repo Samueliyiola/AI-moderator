@@ -11,13 +11,14 @@ dotenv.config();
 
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || "0.0.0.0" ;
 
 app.get("/", (req: Request, res: Response)=>{
     res.json({message : "Server is healthy!"});
 })
 
-server.listen(PORT, async () =>{
+server.listen(PORT, HOST, async () =>{
     try {
         // connectDB();
         await connectRabbitMQ(); 
