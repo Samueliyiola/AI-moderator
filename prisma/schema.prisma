@@ -10,12 +10,16 @@ datasource db {
 }
 
 model Content {
-  id        Int      @id @default(autoincrement())
-  text      String
-  status    Status   @default(PENDING)
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  text        String
+  status      Status   @default(PENDING)
 
-  moderation ModerationResult?
+  reason      String?
+  confidence  Float?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  moderation  ModerationResult?
 }
 
 model ModerationResult {

@@ -1,5 +1,5 @@
 import { prisma } from "../../core/config/db";
-
+import { Decision, Status } from "@prisma/client";
 import { getChannel, QUEUE_NAME } from "../../core/config/rabbitmq";
 
 import { geminiModel } from "../../core/config/gemini";
@@ -30,12 +30,14 @@ const moderateText = async (text: string) => {
     const result = await geminiModel.generateContent(prompt);
 
     const response = await result.response.text();
+    console.log("Raw moderation response:", response);
 
     // Clean Gemini markdown formatting if present
     const cleanedResponse = response.replace(/```json/g, "").replace(/```/g, "").trim();
 
     return JSON.parse(cleanedResponse);
 };
+
 
 export const startModerationWorker = async () => {
 
@@ -53,20 +55,14 @@ export const startModerationWorker = async () => {
 
         try {
 
-            const { contentId, text } = JSON.parse(
-            message.content.toString()
-            );
+            const { contentId, text } = JSON.parse( message.content.toString() );
 
             console.log("Moderating:", text);
 
             // AI moderation
-            const moderation = await moderateText(
-            text
-            );
+            const moderation = await moderateText(text);
 
-            const status = moderation.flagged
-            ? "REJECTED"
-            : "APPROVED";
+            const status = moderation.flagged ? Status.REJECTED : Status.APPROVED;
 
             // Update database
             await prisma.content.update({
@@ -75,22 +71,43 @@ export const startModerationWorker = async () => {
             },
             data: {
                 status,
+                reason: moderation.reason,
+                confidence: moderation.confidence
             },
             });
 
-            console.log(
-            `Content ${contentId} → ${status}`
-            );
+            await prisma.moderationResult.create({
+            data: {
+                contentId,
+
+                violenceScore: moderation.violenceScore,
+
+                hateScore: moderation.hateScore,
+
+                sexualScore: moderation.sexualScore,
+
+                spamScore: moderation.spamScore,
+
+                decision: moderation.flagged ? Decision.REJECTED : Decision.APPROVED,
+                },
+            });
+
+            console.log( `Content ${contentId} → ${status}`);
 
             // Acknowledge successful processing
             channel.ack(message);
 
-        } catch (error) {
+        } catch (error: any) {
+            if(error.status == 429 || error.status == 503){
+                console.warn("Google API is busy:", error.message);
+                channel.nack(message, false, true); // Requeue message
+            }
+            else{
+                console.log("Error processing moderation message:", error);
+                channel.nack(message, false, false); // Reject message
+            }
 
-            console.error(
-            "Moderation worker error:",
-            error
-            );
+            // console.error( "Moderation worker error:", error);
 
         }
         }
