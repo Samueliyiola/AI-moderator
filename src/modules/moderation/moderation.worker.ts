@@ -7,24 +7,35 @@ import { geminiModel } from "../../core/config/gemini";
 const moderateText = async (text: string) => {
 
     const prompt = `
-    You are a strict AI content moderation system.
+        You are a strict AI content moderation system.
 
-    Analyze the following text and determine whether it contains:
-    - hate speech
-    - violence
-    - harassment
-    - self-harm
-    - sexual/offensive content
+        Analyze the following text and determine whether it contains:
+        - hate speech
+        - violence
+        - harassment
+        - self-harm
+        - sexual/offensive content
+        - spam
 
-    Return ONLY valid JSON in this exact format:
+        Return ONLY valid JSON:
 
-    {
-    "flagged": boolean,
-    "reason": "string"
-    }
+        {
+        "flagged": boolean,
+        "reason": "string",
+        "confidence": number,
+        "violenceScore": number,
+        "hateScore": number,
+        "sexualScore": number,
+        "spamScore": number
+        }
 
-    Text:
-    """${text}"""
+        Rules:
+        - All scores must be between 0 and 1.
+        - confidence must be between 0 and 1.
+        - Return raw JSON only.
+
+        Text:
+        """${text}"""
     `;
 
     const result = await geminiModel.generateContent(prompt);
@@ -80,13 +91,13 @@ export const startModerationWorker = async () => {
             data: {
                 contentId,
 
-                violenceScore: moderation.violenceScore,
+                violenceScore: moderation.violenceScore ?? 0,
 
-                hateScore: moderation.hateScore,
+                hateScore: moderation.hateScore ?? 0,
 
-                sexualScore: moderation.sexualScore,
+                sexualScore: moderation.sexualScore ?? 0,
 
-                spamScore: moderation.spamScore,
+                spamScore: moderation.spamScore ?? 0,
 
                 decision: moderation.flagged ? Decision.REJECTED : Decision.APPROVED,
                 },
