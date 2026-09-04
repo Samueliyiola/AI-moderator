@@ -10,9 +10,16 @@ COPY package*.json ./
 # 4. Install the dependencies
 RUN npm install
 
+COPY prisma ./prisma
+
+RUN npx prisma generate
+
+COPY . .
+
 # 5. The code itself will be handled by the bind mount (volumes) in docker-compose, 
 # so I don't strictly need to COPY the rest for local development.
 
 # 6. Expose the port my application listens on
 EXPOSE 3000
 
+CMD ["npm", "run", "dev"]

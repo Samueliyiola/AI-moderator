@@ -9,22 +9,28 @@ const QUEUE_NAME = process.env.QUEUE_NAME || "moderation_queue";
 let channel: amqp.Channel;
 
 export const connectRabbitMQ = async () => {
-  try {
-    console.log(`[RabbitMQ] Connecting to broker at: ${RABBITMQ_URL}`);
-    
-    // Pass the variable here instead of the hardcoded "amqp://localhost"
-    const connection = await amqp.connect(RABBITMQ_URL);
+  let retries = 10;
+  while(retries > 0){
+      try {
+        console.log(`[RabbitMQ] Connecting to broker at: ${RABBITMQ_URL}`);
+        
+        // Pass the variable here instead of the hardcoded "amqp://localhost"
+        const connection = await amqp.connect(RABBITMQ_URL);
 
-    channel = await connection.createChannel();
+        channel = await connection.createChannel();
 
-    await channel.assertQueue(QUEUE_NAME);
+        await channel.assertQueue(QUEUE_NAME);
 
-    console.log(`🚀 RabbitMQ connected successfully to queue: ${QUEUE_NAME}`);
+        console.log(`RabbitMQ connected successfully to queue: ${QUEUE_NAME}`);
+        return channel;
 
-  } catch (error) {
-    console.error("❌ RabbitMQ Connection Error Failure:");
-    console.error(error);
+      } catch (error) {
+        retries--;
+        console.error("RabbitMQ Connection Error Failure: ");
+        console.error(error);
+      }
   }
+
 };
 
 export const getChannel = () => {

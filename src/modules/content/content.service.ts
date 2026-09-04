@@ -20,3 +20,10 @@ export const createContentService = async (text: string) => {
 
   return content;
 };
+
+export const getContentService = async (contentId: number) => {
+  const content = await prisma.content.findUnique({
+    where: { id: contentId }
+  });
+  return content;
+};
